@@ -1,3 +1,4 @@
+version: "3.8"
 services:
   isa-scanner:
     image: ghcr.io/intellisoftalpin/isa:${ISA_IMAGE_TAG:-latest}
@@ -18,4 +19,20 @@ services:
       timeout: 10s
       start_period: 30s
       retries: 3
-      
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Stockholm
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - --label-enable
+      - --cleanup
+      - --schedule
+      - "0 7 * * *"
+      - --rolling-restart
