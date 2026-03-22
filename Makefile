@@ -1,5 +1,6 @@
 SHELL := /bin/sh
 ENV_FILE ?= .env
+DOCKER ?= $(shell command -v docker 2>/dev/null || echo "docker")
 
 define DOCKER_COMPOSE
 	if $(DOCKER) compose version >/dev/null 2>&1; then \
