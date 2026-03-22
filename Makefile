@@ -37,6 +37,7 @@ help:
 
 init:
 	@mkdir -p ./data ./ssh_keys
+	@chmod 770 ./data ./ssh_keys
 	@if [ ! -f "$(ENV_FILE)" ]; then \
 		if [ -f ".env.local" ]; then \
 			cp .env.local "$(ENV_FILE)"; \
@@ -45,8 +46,18 @@ init:
 			echo "No .env.local found. Continuing without $(ENV_FILE)."; \
 		fi \
 	fi
-	@grep -q '^DOCKER_UID=' "$(ENV_FILE)" 2>/dev/null || echo "DOCKER_UID=$$(id -u)" >> "$(ENV_FILE)"
 	@grep -q '^DOCKER_GID=' "$(ENV_FILE)" 2>/dev/null || echo "DOCKER_GID=$$(id -g)" >> "$(ENV_FILE)"
+	@grep -q '^DOCKER_SOCK=' "$(ENV_FILE)" 2>/dev/null || { \
+		if [ -S "$${XDG_RUNTIME_DIR}/docker.sock" ]; then \
+			echo "DOCKER_SOCK=$${XDG_RUNTIME_DIR}/docker.sock" >> "$(ENV_FILE)"; \
+		elif [ -S "/run/user/$$(id -u)/docker.sock" ]; then \
+			echo "DOCKER_SOCK=/run/user/$$(id -u)/docker.sock" >> "$(ENV_FILE)"; \
+		elif [ -S /var/run/docker.sock ]; then \
+			echo "DOCKER_SOCK=/var/run/docker.sock" >> "$(ENV_FILE)"; \
+		else \
+			echo "DOCKER_SOCK=/var/run/docker.sock" >> "$(ENV_FILE)"; \
+		fi; \
+	}
 
 pull:
 	@COMPOSE="$$(sh -c '$(DOCKER_COMPOSE)')" && $$COMPOSE --env-file "$(ENV_FILE)" pull
