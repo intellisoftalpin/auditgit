@@ -2,6 +2,7 @@ services:
   isa-scanner:
     image: ghcr.io/intellisoftalpin/isa:${ISA_IMAGE_TAG:-latest}
     container_name: isa-scanner
+    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
     ports:
       - "${ISA_PORT:-18080}:18080"
     volumes:

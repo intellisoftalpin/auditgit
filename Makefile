@@ -45,6 +45,8 @@ init:
 			echo "No .env.local found. Continuing without $(ENV_FILE)."; \
 		fi \
 	fi
+	@grep -q '^DOCKER_UID=' "$(ENV_FILE)" 2>/dev/null || echo "DOCKER_UID=$$(id -u)" >> "$(ENV_FILE)"
+	@grep -q '^DOCKER_GID=' "$(ENV_FILE)" 2>/dev/null || echo "DOCKER_GID=$$(id -g)" >> "$(ENV_FILE)"
 
 pull:
 	@COMPOSE="$$(sh -c '$(DOCKER_COMPOSE)')" && $$COMPOSE --env-file "$(ENV_FILE)" pull
